@@ -1,5 +1,5 @@
 class UsersController < ApplicationController 
-   beifore_filter :authenticate, :only => [:index, :edit, :update]
+   before_filter :authenticate, :only => [:index, :edit, :update]
    before_filter :correct_user, :only => [:edit, :update]
    before_filter :admin_user,   :only => :destroy
   def show
@@ -47,12 +47,20 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(:page => params[:page])
     @title = @user.name
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
+    #User.find(params[:id]).destroy
+    #flash[:success] = "User destroyed."
+    #redirect_to users_path
+    if current_user.id == User.find(params[:id])
+      flash[:notice] = "You cannot delete yourself."
+    else
+      User.find(params[:id]).destroy
+      flash[:success] = "User destroyed."
+    end
     redirect_to users_path
   end
 
